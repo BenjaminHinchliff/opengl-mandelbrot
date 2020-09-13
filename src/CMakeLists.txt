@@ -1,0 +1,5 @@
+﻿cmake_minimum_required(VERSION 3.8)
+
+add_executable(openglmandelbrot "main.cpp" "shader.cpp" "shader.H++")
+target_link_libraries(openglmandelbrot PRIVATE glad)
+target_link_libraries(openglmandelbrot PRIVATE glfw)
