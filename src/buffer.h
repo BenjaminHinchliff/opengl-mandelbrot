@@ -11,11 +11,11 @@ public:
 	Buffer(GLenum typeParam, const std::vector<T>& dataParam, GLenum usage = GL_STATIC_DRAW);
 	~Buffer();
 
-	void bind() const noexcept;
-	void unbind() const noexcept;
+	void bind() noexcept;
+	void unbind() noexcept;
 
-	Buffer(Buffer&& other);
-	Buffer& operator=(Buffer&& other);
+	Buffer(Buffer&& other) noexcept;
+	Buffer& operator=(Buffer&& other) noexcept;
 
 	Buffer(Buffer& other) = delete;
 	Buffer& operator=(Buffer& other) = delete;

@@ -22,19 +22,19 @@ Buffer<T>::~Buffer()
 }
 
 template<typename T>
-void Buffer<T>::bind() const noexcept
+void Buffer<T>::bind() noexcept
 {
 	glBindBuffer(type, handle);
 }
 
 template<typename T>
-void Buffer<T>::unbind() const noexcept
+void Buffer<T>::unbind() noexcept
 {
 	glBindBuffer(type, 0);
 }
 
 template<typename T>
-Buffer<T>::Buffer(Buffer&& other)
+Buffer<T>::Buffer(Buffer&& other) noexcept
 {
 	type = other.type;
 	data = std::move(other.data);
@@ -43,7 +43,7 @@ Buffer<T>::Buffer(Buffer&& other)
 }
 
 template<typename T>
-Buffer<T>& Buffer<T>::operator=(Buffer&& other)
+Buffer<T>& Buffer<T>::operator=(Buffer&& other) noexcept
 {
 	type = other.type;
 	data = std::move(other.data);

@@ -8,6 +8,7 @@
 
 #include "shader.h"
 #include "buffer.h"
+#include "vertex_array.h"
 
 constexpr unsigned int SCR_WIDTH = 800;
 constexpr unsigned int SCR_HEIGHT = 600;
@@ -113,9 +114,8 @@ int main()
 		1, 2, 3
 	};
 
-	uint32_t VAO;
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
+	VertexArray VAO;
+	VAO.bind();
 
 	Buffer<float> VBO(GL_ARRAY_BUFFER, vertices);
 	VBO.bind();
@@ -129,9 +129,9 @@ int main()
 	glEnableVertexAttribArray(1);
 	TBO.unbind();
 
-	Buffer<uint32_t> EBO(GL_ELEMENT_ARRAY_BUFFER, indices);
+	VAO.unbind();
 
-	glBindVertexArray(0);
+	Buffer<uint32_t> EBO(GL_ELEMENT_ARRAY_BUFFER, indices);
 	
 	while (!glfwWindowShouldClose(window))
 	{
@@ -141,7 +141,7 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glUseProgram(*program);
-		glBindVertexArray(VAO);
+		VAO.bind();
 		EBO.bind();
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
