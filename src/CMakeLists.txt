@@ -14,3 +14,4 @@ set(SRCS
 add_executable(openglmandelbrot ${SRCS} ${HDRS})
 target_link_libraries(openglmandelbrot PRIVATE glad)
 target_link_libraries(openglmandelbrot PRIVATE glfw)
+target_link_libraries(openglmandelbrot PRIVATE stb)

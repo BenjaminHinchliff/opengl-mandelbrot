@@ -5,6 +5,7 @@
 
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
+#include "stb/stb_image.h"
 
 #include "shader.h"
 #include "buffer.h"
