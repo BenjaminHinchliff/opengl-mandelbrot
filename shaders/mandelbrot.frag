@@ -8,6 +8,7 @@ in vec2 texCoord;
 //uniform int iter;
 uniform vec2 resolution;
 uniform int max_iter;
+uniform sampler1D palette;
 
 int get_iter(vec2 point) {
 	vec2 a = vec2(0.0, 0.0);
@@ -31,5 +32,5 @@ void main()
 	position -= vec2(1.0, 0.5);
 	position *= 2;
 	int iter = get_iter(position);
-	FragColor = vec4(float(iter) / max_iter, 0.0, 0.0, 1.0);
+	FragColor = texture(palette, float(iter) / max_iter);
 }

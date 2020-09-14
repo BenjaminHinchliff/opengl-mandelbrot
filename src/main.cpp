@@ -5,6 +5,7 @@
 
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
+#define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 
 #include "shader.h"
@@ -133,6 +134,31 @@ int main()
 	VAO.unbind();
 
 	Buffer<uint32_t> EBO(GL_ELEMENT_ARRAY_BUFFER, indices);
+
+	uint32_t texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_1D, texture);
+
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	int width;
+	int height;
+	int nrChannels;
+	uint8_t* data = stbi_load("../textures/palette.png", &width, &height, &nrChannels, 0);
+	if (data)
+	{
+		GLenum format = nrChannels == 3 ? GL_RGB : GL_RGBA;
+		glTexImage1D(GL_TEXTURE_1D, 0, format, width, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_1D);
+	}
+	else
+	{
+		std::cerr << "Failed to load palette texture" << '\n';
+		return 1;
+	}
+	stbi_image_free(data);
 	
 	while (!glfwWindowShouldClose(window))
 	{
@@ -141,10 +167,11 @@ int main()
 		glClearColor(0.2f, 0.5f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		glBindTexture(GL_TEXTURE_1D, texture);
 		glUseProgram(*program);
 		VAO.bind();
 		EBO.bind();
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, 0);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
