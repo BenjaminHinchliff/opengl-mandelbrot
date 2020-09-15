@@ -11,7 +11,7 @@ Buffer<T>::Buffer(GLenum typeParam, const std::vector<T>& dataParam, GLenum usag
 {
 	glGenBuffers(1, &handle);
 	glBindBuffer(type, handle);
-	glBufferData(type, sizeof(data), data.data(), usage);
+	glBufferData(type, sizeof(T) * data.size(), data.data(), usage);
 	glBindBuffer(type, 0);
 }
 

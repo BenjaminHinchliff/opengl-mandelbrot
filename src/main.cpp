@@ -35,7 +35,14 @@ GlfwInitializer::~GlfwInitializer()
 	glfwTerminate();
 }
 
+struct ResolutionUniform
+{
+	shader::Program& program;
+	int loc;
+};
+
 void processInput(GLFWwindow* window);
+void resizeCallback(GLFWwindow* window, int width, int height);
 
 int main()
 {
@@ -62,14 +69,6 @@ int main()
 		return 1;
 	}
 
-	glfwSetFramebufferSizeCallback(
-		window,
-		[](GLFWwindow* window, int width, int height)
-		{
-			glViewport(0, 0, width, height);
-		}
-	);
-
 	shader::Program program;
 	try
 	{
@@ -93,9 +92,15 @@ int main()
 	}
 
 	glUseProgram(*program);
-	glUniform2f(glGetUniformLocation(*program, "resolution"), SCR_WIDTH, SCR_HEIGHT);
+	int programLoc = glGetUniformLocation(*program, "resolution");
+	glUniform2f(programLoc, SCR_WIDTH, SCR_HEIGHT);
 	glUniform1i(glGetUniformLocation(*program, "max_iter"), 50);
 	glUseProgram(0);
+
+	ResolutionUniform resolution{ program, programLoc };
+
+	glfwSetWindowUserPointer(window, &resolution);
+	glfwSetFramebufferSizeCallback(window, resizeCallback);
 
 	std::vector<float> vertices{
 		 1.0f,  1.0f,
@@ -146,6 +151,7 @@ int main()
 	int width;
 	int height;
 	int nrChannels;
+	stbi_set_flip_vertically_on_load(true);
 	uint8_t* data = stbi_load("../textures/palette.png", &width, &height, &nrChannels, 0);
 	if (data)
 	{
@@ -164,7 +170,7 @@ int main()
 	{
 		processInput(window);
 
-		glClearColor(0.2f, 0.5f, 0.0f, 1.0f);
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glBindTexture(GL_TEXTURE_1D, texture);
@@ -184,4 +190,13 @@ void processInput(GLFWwindow* window)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
+}
+
+void resizeCallback(GLFWwindow* window, int width, int height)
+{
+	ResolutionUniform& uniform = *static_cast<ResolutionUniform*>(glfwGetWindowUserPointer(window));
+	glViewport(0, 0, width, height);
+	glUseProgram(*uniform.program);
+	glUniform2f(uniform.loc, static_cast<float>(width), static_cast<float>(height));
+	glUseProgram(0);
 }
