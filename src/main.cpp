@@ -151,7 +151,7 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		texture.bind();
-		glUseProgram(*program);
+		program.use();
 		VAO.bind();
 		EBO.bind();
 		glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, 0);

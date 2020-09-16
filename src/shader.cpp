@@ -94,6 +94,16 @@ namespace shader
 		return *this;
 	}
 
+	void Program::use() noexcept
+	{
+		glUseProgram(handle);
+	}
+
+	void Program::unuse() noexcept
+	{
+		glUseProgram(0);
+	}
+
 	const GLuint& Program::operator*() const noexcept
 	{
 		return handle;

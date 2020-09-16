@@ -52,6 +52,9 @@ namespace shader
 		Program(Program& other) = delete;
 		Program& operator=(Program& other) = delete;
 
+		void use() noexcept;
+		void unuse() noexcept;
+
 		const GLuint& operator*() const noexcept;
 	private:
 		GLuint handle = 0;
