@@ -3,12 +3,14 @@
 set(HDRS
 	"shader.h"
 	"buffer.h"
-	"vertex_array.h")
+	"vertex_array.h"
+	"texture.h")
 
 set(SRCS
 	"shader.cpp"
 	"buffer.inl"
 	"vertex_array.cpp"
+	"texture.cpp"
 	"main.cpp")
 
 add_executable(openglmandelbrot ${SRCS} ${HDRS})

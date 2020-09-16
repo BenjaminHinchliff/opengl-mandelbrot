@@ -11,6 +11,7 @@
 #include "shader.h"
 #include "buffer.h"
 #include "vertex_array.h"
+#include "texture.h"
 
 constexpr unsigned int SCR_WIDTH = 800;
 constexpr unsigned int SCR_HEIGHT = 600;
@@ -140,31 +141,7 @@ int main()
 
 	Buffer<uint32_t> EBO(GL_ELEMENT_ARRAY_BUFFER, indices);
 
-	uint32_t texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_1D, texture);
-
-	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	int width;
-	int height;
-	int nrChannels;
-	stbi_set_flip_vertically_on_load(true);
-	uint8_t* data = stbi_load("../textures/palette.png", &width, &height, &nrChannels, 0);
-	if (data)
-	{
-		GLenum format = nrChannels == 3 ? GL_RGB : GL_RGBA;
-		glTexImage1D(GL_TEXTURE_1D, 0, format, width, 0, format, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_1D);
-	}
-	else
-	{
-		std::cerr << "Failed to load palette texture" << '\n';
-		return 1;
-	}
-	stbi_image_free(data);
+	Texture1D texture("../textures/palette.png");
 	
 	while (!glfwWindowShouldClose(window))
 	{
@@ -173,7 +150,7 @@ int main()
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glBindTexture(GL_TEXTURE_1D, texture);
+		texture.bind();
 		glUseProgram(*program);
 		VAO.bind();
 		EBO.bind();
