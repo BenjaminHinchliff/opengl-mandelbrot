@@ -2,11 +2,14 @@
 #include <array>
 #include <fstream>
 #include <sstream>
+#include <functional>
 
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb/stb_image_write.h"
 
 #include "shader.h"
 #include "buffer.h"
@@ -15,6 +18,8 @@
 
 constexpr unsigned int SCR_WIDTH = 800;
 constexpr unsigned int SCR_HEIGHT = 600;
+constexpr uint32_t IMG_WIDTH = 1600;
+constexpr uint32_t IMG_HEIGHT = 1200;
 
 class GlfwInitializer
 {
@@ -36,10 +41,11 @@ GlfwInitializer::~GlfwInitializer()
 	glfwTerminate();
 }
 
-struct ResolutionUniform
+struct WindowData
 {
+	std::function<void()> drawFn;
 	shader::Program& program;
-	int loc;
+	int resolutionLoc;
 };
 
 void processInput(GLFWwindow* window);
@@ -98,11 +104,6 @@ int main()
 	glUniform1i(glGetUniformLocation(*program, "max_iter"), 50);
 	glUseProgram(0);
 
-	ResolutionUniform resolution{ program, programLoc };
-
-	glfwSetWindowUserPointer(window, &resolution);
-	glfwSetFramebufferSizeCallback(window, resizeCallback);
-
 	std::vector<float> vertices{
 		 1.0f,  1.0f,
 		 1.0f, -1.0f,
@@ -142,11 +143,8 @@ int main()
 	Buffer<uint32_t> EBO(GL_ELEMENT_ARRAY_BUFFER, indices);
 
 	Texture1D texture("../textures/palette.png");
-	
-	while (!glfwWindowShouldClose(window))
-	{
-		processInput(window);
 
+	std::function<void()> draw = [&]() {
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
@@ -155,8 +153,55 @@ int main()
 		VAO.bind();
 		EBO.bind();
 		glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, 0);
+	};
 
+	WindowData resolution{ draw, program, programLoc };
+
+	glfwSetWindowUserPointer(window, &resolution);
+	glfwSetFramebufferSizeCallback(window, resizeCallback);
+
+	//uint32_t fbo;
+	//glGenFramebuffers(1, &fbo);
+	//glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+	//uint32_t renderedTex;
+	//glGenTextures(1, &renderedTex);
+	//glBindTexture(GL_TEXTURE_2D, renderedTex);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, IMG_WIDTH, IMG_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+	//glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderedTex, 0);
+	//
+	//GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+	//glDrawBuffers(1, DrawBuffers);
+
+	//if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	//{
+	//	std::cerr << "something went wrong the framebuffer" << '\n';
+	//	return 1;
+	//}
+
+	//glViewport(0, 0, IMG_WIDTH, IMG_HEIGHT);
+	//draw();
+
+	//std::vector<uint8_t> data;
+	//data.reserve(IMG_WIDTH * IMG_HEIGHT * 4);
+	//glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.data());
+	//stbi_write_png("mandelbrot.png", IMG_WIDTH, IMG_HEIGHT, 4, data.data(), IMG_WIDTH * 4);
+
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+
+	while (!glfwWindowShouldClose(window))
+	{
+		processInput(window);
+
+		draw();
 		glfwSwapBuffers(window);
+
 		glfwPollEvents();
 	}
 
@@ -171,9 +216,11 @@ void processInput(GLFWwindow* window)
 
 void resizeCallback(GLFWwindow* window, int width, int height)
 {
-	ResolutionUniform& uniform = *static_cast<ResolutionUniform*>(glfwGetWindowUserPointer(window));
+	WindowData& uniform = *static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 	glViewport(0, 0, width, height);
 	glUseProgram(*uniform.program);
-	glUniform2f(uniform.loc, static_cast<float>(width), static_cast<float>(height));
+	glUniform2f(uniform.resolutionLoc, static_cast<float>(width), static_cast<float>(height));
 	glUseProgram(0);
+	uniform.drawFn();
+	glfwSwapBuffers(window);
 }

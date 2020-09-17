@@ -49,5 +49,5 @@ Buffer<T>& Buffer<T>::operator=(Buffer&& other) noexcept
 	data = std::move(other.data);
 	handle = other.handle;
 	other.handle = 0;
-	return *this
+	return *this;
 }

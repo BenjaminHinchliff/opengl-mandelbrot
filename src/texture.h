@@ -25,7 +25,7 @@ class Texture1D : public Texture
 {
 public:
 	Texture1D();
-	Texture1D(const std::string& filepath);
+	Texture1D(const std::string& filepath, GLenum wrapS = GL_REPEAT, GLenum minFilter = GL_LINEAR, GLenum magFilter = GL_LINEAR);
 
 	virtual void bind();
 	virtual void unbind();

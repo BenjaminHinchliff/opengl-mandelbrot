@@ -1,30 +1,47 @@
 #version 330 core
-out vec4 FragColor;
+layout(location = 0) out vec4 FragColor;
 
 in vec2 texCoord;
 
-//uniform vec2 center;
-//uniform float scale;
-//uniform int iter;
 uniform vec2 resolution;
 uniform int max_iter;
 uniform sampler1D palette;
 
-int mandelbrot(vec2 point)
+void square_plus_c(inout vec2 z, in vec2 c)
 {
-	vec2 z = vec2(0.0, 0.0);
-	for (int i = 0; i < max_iter; i++)
+	float tmpX = z.x;
+	z.x = z.x * z.x - z.y * z.y;
+	z.y = 2.0 * tmpX * z.y;
+	z += c;
+}
+
+int mandelbrot(in vec2 point, out vec2 z)
+{
+	z = vec2(0.0, 0.0);
+	for (int i = 0; i < max_iter; ++i)
 	{
-		if (length(z * z) > 4.0)
+		if (length(z) > 20.0)
 		{
 			return i;
 		}
-		float tmpX = z.x;
-		z.x = z.x * z.x - z.y * z.y;
-		z.y = 2.0 * tmpX * z.y;
-		z += point;
+		square_plus_c(z, point);
 	}
-	return 0;
+	return max_iter;
+}
+
+const float ln_2_0 = log(2.0); 
+
+float mandelbrot_renorm(in vec2 point)
+{
+	vec2 z;
+	int iters = mandelbrot(point, z);
+	// short circut if it's within set
+	if (iters == max_iter) return iters;
+	// steps to narrow errors
+	square_plus_c(z, point);
+	square_plus_c(z, point);
+	float mu = iters + 1 - log(log(length(z))) / ln_2_0;
+	return mu;
 }
 
 void main()
@@ -33,8 +50,11 @@ void main()
 	vec2 position;
 	position.x = aspect * texCoord.x;
 	position.y = texCoord.y;
-	position -= vec2(1.0, 0.5);
 	position *= 2;
-	int iter = mandelbrot(position);
-	FragColor = texture(palette, float(iter) / max_iter);
+	position -= vec2(1.5, 1.0);
+	position += vec2(-0.5, 0.0);
+	// position /= 1.0 / 2.0;
+	float mu = mandelbrot_renorm(position);
+	float iter = mu / max_iter;
+	FragColor = texture(palette, iter);
 }

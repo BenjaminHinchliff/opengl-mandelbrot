@@ -14,7 +14,7 @@ Texture1D::Texture1D() : Texture()
 {
 }
 
-Texture1D::Texture1D(const std::string& filepath) : Texture1D()
+Texture1D::Texture1D(const std::string& filepath, GLenum wrapS, GLenum minFilter, GLenum magFilter) : Texture1D()
 {
 	int width;
 	int height;
@@ -27,9 +27,9 @@ Texture1D::Texture1D(const std::string& filepath) : Texture1D()
 	}
 
 	bind();
-	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, wrapS);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, minFilter);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, magFilter);
 
 	GLenum format = nrChannels == 3 ? GL_RGB : GL_RGBA;
 	glTexImage1D(GL_TEXTURE_1D, 0, format, width, 0, format, GL_UNSIGNED_BYTE, data.get());
